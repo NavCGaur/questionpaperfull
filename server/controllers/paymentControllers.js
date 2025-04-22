@@ -35,13 +35,20 @@ import {
   
   export const verifyPayment = async (req, res) => {
     try {
-      const result = await verifyPaymentService(req.params.orderId);
-      res.json(result);
+      const { orderId, type } = req.query;
+
+      console.log("Query Parameters:", req.query); 
+      
+      if (!orderId) {
+        return res.status(400).json({ message: "Order ID is required" });
+      }
+      
+      const result = await verifyPaymentService({ orderId, type });
+      
+      return res.status(200).json(result);
     } catch (error) {
-      res.status(500).json({
-        status: 'FAILED',
-        message: 'Internal server error. Please try again later.',
-      });
+      console.error("Error in verifyPaymentController:", error);
+      return res.status(500).json({ message: "Internal server error" });
     }
   };
   

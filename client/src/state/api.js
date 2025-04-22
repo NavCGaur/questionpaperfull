@@ -46,7 +46,7 @@ export const paperApi = createApi({
       }),
     }),
     verifyPayment: builder.query({
-      query: (orderId) => `api/payments/update-payment/${orderId}`,
+      query: ({ orderId, type }) => `api/payments/verify?orderId=${orderId}&type=${type || 'question'}`,
     }),
     fetchEduData: builder.query({
       query: () => '/api/education/data',

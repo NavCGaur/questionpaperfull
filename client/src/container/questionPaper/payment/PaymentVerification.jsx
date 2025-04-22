@@ -6,24 +6,31 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import "./PaymentVerification.css"; // Import external CSS
+import "./PaymentVerification.css";
 
 const PaymentVerification = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const orderId = params.get("order_id");
+  // Get payment type from state or query params
+  const paymentType = location.state?.paymentType || params.get("type") || "answer";
 
   const MAX_ATTEMPTS = 10;
   const [attempts, setAttempts] = useState(0);
   const [status, setStatus] = useState("Verifying your payment...");
   const [stopPolling, setStopPolling] = useState(false);
-  const [isDownloaded, setIsDownloaded] = useState(false); // ✅ New state for download status
+  const [isDownloaded, setIsDownloaded] = useState(false);
   const downloadStarted = useRef(false);
 
-  const { data: paymentStatus, isLoading } = useVerifyPaymentQuery(orderId, {
-    skip: !orderId || stopPolling || attempts >= MAX_ATTEMPTS,
-    pollingInterval: 10000, // Check every 10 sec
-  });
+  const { data: paymentStatus, isLoading } = useVerifyPaymentQuery(
+    { orderId, type: paymentType },
+    {
+      skip: !orderId || stopPolling || attempts >= MAX_ATTEMPTS,
+      pollingInterval: 10000, // Check every 10 sec
+    }
+  );
+
+  console.log("Payment Status in verification:", paymentStatus);
 
   const startDownload = (url) => {
     const a = document.createElement("a");
@@ -32,7 +39,7 @@ const PaymentVerification = () => {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setIsDownloaded(true); // ✅ Update state when download completes
+    setIsDownloaded(true);
   };
 
   useEffect(() => {
@@ -50,11 +57,20 @@ const PaymentVerification = () => {
 
     switch (paymentStatus.paymentStatus) {
       case "PAID":
-        if (paymentStatus.answerPaperUrl && !downloadStarted.current) {
+        if (!downloadStarted.current) {
           downloadStarted.current = true;
-          startDownload(paymentStatus.answerPaperUrl);
+          // Determine which URL to use based on payment type
+          const downloadUrl = paymentType === 'question' 
+            ? paymentStatus.questionPaperUrl 
+            : paymentStatus.answerPaperUrl;
+            
+          if (downloadUrl) {
+            startDownload(downloadUrl);
+          } else {
+            setStatus(`Error: ${paymentType === 'question' ? 'Question' : 'Answer'} paper URL not found.`);
+          }
         }
-        setStatus("Payment verified! Your answer paper is downloading.");
+        setStatus(`Payment verified! Your ${paymentType} paper is downloading.`);
         setStopPolling(true);
         break;
 
@@ -76,12 +92,14 @@ const PaymentVerification = () => {
         setStatus("An unexpected error occurred. Please contact support.");
         setStopPolling(true);
     }
-  }, [paymentStatus, attempts, stopPolling]);
+  }, [paymentStatus, attempts, stopPolling, paymentType]);
+
+  const paperTypeLabel = paymentType === 'question' ? 'Question Paper' : 'Answer Paper';
 
   return (
     <div className="payment-verification">
       <div className="payment-verification__container">
-        {isDownloaded ? ( // ✅ Show download success icon
+        {isDownloaded ? (
           <FileDownloadDoneIcon className="payment-verification__icon payment-verification__icon--downloaded" />
         ) : isLoading ? (
           <CircularProgress className="payment-verification__icon payment-verification__icon--loading" />
@@ -94,9 +112,8 @@ const PaymentVerification = () => {
         )}
 
         <h2 className="payment-verification__status">
-          {isDownloaded ? "Download Complete! Check your files." : status}
+          {isDownloaded ? `${paperTypeLabel} Download Complete! Check your files.` : status}
         </h2>
-       
 
         {paymentStatus?.status === "FAILED" && (
           <button

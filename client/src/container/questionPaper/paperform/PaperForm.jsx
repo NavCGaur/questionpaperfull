@@ -6,19 +6,15 @@ import {storage} from '../../config/FirebaseConfig.js'
 import {  useFetchEduDataQuery} from '../../../state/api.js';
 import './index.css';
 
-
 // Firebase imports
 import { ref, getDownloadURL } from 'firebase/storage';
 
-
-
-const PaperForm = ( {onClose, generatePaperMutation }) => {
+const PaperForm = ({ onClose, generatePaperMutation }) => {
 
     const [generatePaper, { isLoading }] = generatePaperMutation;
 
     const { data: eduData } = useFetchEduDataQuery();
     
-
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
       className: '',
@@ -34,24 +30,20 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
     const [paperId, setPaperId] = useState(null);
     const [buttonStatus, setButtonStatus] = useState('initial');
     
-
     // State to store all data (classes, subjects, chapters)
-  const [allData, setAllData] = useState({
-    classes: [], // List of classes
-    subjects: {}, // { className: [subjects] }
-    chapters: {}, // { className: { subject: [chapters] } }
-  });
+    const [allData, setAllData] = useState({
+      classes: [], // List of classes
+      subjects: {}, // { className: [subjects] }
+      chapters: {}, // { className: { subject: [chapters] } }
+    });
 
-  // Fetch all data when the component mounts
-  useEffect(() => {
-    if (eduData) {
-      console.log("eduData:", eduData);
-      setAllData(eduData);
-    }
-  }, [eduData]); // Only re-run when eduData changes
-  
-
-
+    // Fetch all data when the component mounts
+    useEffect(() => {
+      if (eduData) {
+        console.log("eduData:", eduData);
+        setAllData(eduData);
+      }
+    }, [eduData]); // Only re-run when eduData changes
   
     const resetForm = () => {
       setFormData({
@@ -75,9 +67,9 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
   
       try {
         const result = await generatePaper(updatedFormData).unwrap();
+        setPaperId(result.paperId);
         setFilePathQuestion(result.filePathQuestion);
         setFilePathAnswer(result.filePathAnswer);
-        setPaperId(result.paperId);
       } catch (error) {
         console.error('Failed to generate paper:', error);
       }
@@ -89,45 +81,14 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
       }
     }, [isLoading]);
   
-    useEffect(() => {
-      if (filePathQuestion) {
-        const downloadFile = async (filePath, isAnswer = false) => {
-          try {
-            const fileRef = ref(storage, filePath);
-            const url = await getDownloadURL(fileRef);
-  
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filePath.split('/').pop();
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-  
-            if (!isAnswer) {
-              setButtonStatus('downloaded');
-              setTimeout(() => {
-                setButtonStatus('ready');
-              }, 15000);
-            }
-          } catch (error) {
-            console.error('Failed to download file:', error);
-            setButtonStatus('initial');
-          }
-        };
-  
-        downloadFile(filePathQuestion);
-      }
-    }, [filePathQuestion]);
-  
-    const downloadBothFiles = () => {
-      navigate('/payment', { state: { paperId } });
+    const navigateToPayment = (type) => {
+      navigate('/payment', { state: { paperId, type } });
     };
   
     const getButtonContent = () => {
       switch (buttonStatus) {
         case 'loading':
-          return (
+          return (!paperId && (
             <div style={{ textAlign: 'center', marginTop: '5px' }}>
               <LinearProgress
                 sx={{
@@ -139,39 +100,33 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
               <p style={{ color: '#000000', margin: 0 }}>
                 Your Paper is being generated, please wait.
               </p>
-            </div>
-          );
-        case 'downloaded':
-          return (
-            <span style={{ color: '#fff' }}>
-              Paper Downloaded, Check Download folder
-            </span>
+            </div>)
           );
         case 'ready':
           return 'Generate another paper';
         default:
-          return 'Download Questions - Free';
+          return 'Generate Paper';
       }
     };
   
-  // Handle class change
-  const handleClassChange = (e) => {
-    const className = e.target.value;
-    setFormData({ ...formData, className, subject: '', chapters: [] });
-  };
+    // Handle class change
+    const handleClassChange = (e) => {
+      const className = e.target.value;
+      setFormData({ ...formData, className, subject: '', chapters: [] });
+    };
 
-  // Handle subject change
-  const handleSubjectChange = (e) => {
-    const subject = e.target.value;
-    setFormData({ ...formData, subject, chapters: [] });
-  };
+    // Handle subject change
+    const handleSubjectChange = (e) => {
+      const subject = e.target.value;
+      setFormData({ ...formData, subject, chapters: [] });
+    };
 
-  // Handle chapters change
-  const handleChaptersChange = (e) => {
-    const selectedChapters = Array.isArray(e.target.value) ? e.target.value : [];
-    setFormData({ ...formData, chapters: selectedChapters });
-  };
-  
+    // Handle chapters change
+    const handleChaptersChange = (e) => {
+      const selectedChapters = Array.isArray(e.target.value) ? e.target.value : [];
+      setFormData({ ...formData, chapters: selectedChapters });
+    };
+    
     const handleNumSectionsChange = (e) => {
       const value = parseInt(e.target.value, 10);
       setNumSections(value);
@@ -199,8 +154,6 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
       });
       setFormData({ ...formData, sections: updatedSections });
     };
-  
-   
   
     const totalQuestions = formData.sections.reduce((sum, section) => sum + parseInt(section.numQuestions || 0, 10), 0);
     const totalPaperMarks = formData.sections.reduce((sum, section) => sum + parseInt(section.totalMarks || 0, 10), 0);
@@ -298,7 +251,6 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
           </FormControl>
         </div>
 
-  
           <div className="container__paperform-form-group">
             <FormControl fullWidth margin="normal">
               <InputLabel>Number of Sections</InputLabel>
@@ -354,28 +306,50 @@ const PaperForm = ( {onClose, generatePaperMutation }) => {
             {getButtonContent()}
           </Button>
   
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            disabled={isLoading || !filePathAnswer}
-            fullWidth
-            onClick={downloadBothFiles}
-            sx={{
-              backgroundColor: isLoading ? 'white' : '#FF4820',
-              color: isLoading ? 'black' : undefined,
-              mt: '1rem',
-              '&:hover': {
-                backgroundColor: buttonStatus === 'ready' ? '#1565c0' : '#FF4820'
-              }
-            }}
-          >
-            Download Answers Also - (₹5)
-          </Button>
+          {paperId && (
+            <>
+              <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                fullWidth
+                onClick={() => navigateToPayment('question')}
+                sx={{
+                  backgroundColor: isLoading ? 'white' : '#4CAF50',
+                  color: isLoading ? 'black' : undefined,
+                  mt: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#45a049'
+                  }
+                }}
+              >
+                Download Question Paper - (₹2)
+              </Button>
+
+              <Button
+                type="button"
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                fullWidth
+                onClick={() => navigateToPayment('answer')}
+                sx={{
+                  backgroundColor: isLoading ? 'white' : '#FF4820',
+                  color: isLoading ? 'black' : undefined,
+                  mt: '1rem',
+                  '&:hover': {
+                    backgroundColor: '#e53935'
+                  }
+                }}
+              >
+                Download Answer Paper - (₹5)
+              </Button>
+            </>
+          )}
         </form>
       </div>
     );
   };
   
   export default PaperForm;
-  
