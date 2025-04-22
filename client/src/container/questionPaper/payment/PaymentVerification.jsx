@@ -13,7 +13,7 @@ const PaymentVerification = () => {
   const params = new URLSearchParams(location.search);
   const orderId = params.get("order_id");
   // Get payment type from state or query params
-  const paymentType = location.state?.paymentType || params.get("type") || "answer";
+  const paymentType = location.state?.paymentType || params.get("type") || "question";
 
   const MAX_ATTEMPTS = 10;
   const [attempts, setAttempts] = useState(0);

@@ -10,7 +10,10 @@ const CASHFREE_BASE_URL = process.env.CASHFREE_BASE_URL
 export const createOrderService = async (body) => {
 
      
-    const paperId = body.paperId;
+  console.log("Received body:", body);
+    const paperId= body.paperId;
+    const amount= body.amount;
+
   
     try {
   
@@ -22,7 +25,7 @@ export const createOrderService = async (body) => {
       
       const orderPayload = {
         order_id: orderId,
-        order_amount: 5,
+        order_amount: amount,
         order_currency: "INR",
         customer_details: {
           customer_id: `guest_${Date.now()}`,
@@ -86,7 +89,7 @@ export const createOrderService = async (body) => {
         };
     }};
 
-    export const updatePaymentService = async (orderId) => {
+    export const updatePaymentService = async ({ orderId, type }) => {
       try {
         // Validate orderId
         if (!orderId) {
@@ -252,8 +255,6 @@ export const createOrderService = async (body) => {
           };
         }
     
-        // Determine the price based on the paper type
-        const amount = type === 'question' ? 2 : 5;
         
         // Create a unique order ID
         const orderId = `order_${Date.now()}_${Math.floor(Math.random() * 1000)}`;

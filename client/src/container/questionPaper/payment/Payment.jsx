@@ -16,6 +16,9 @@ const Payment = () => {
   const paymentType = location.state?.type || 'question'; // Default to 'answer' if not specified
   const CASHFREE_MODE = process.env.REACT_APP_MODE;
 
+   // Calculate the price based on the payment type
+   const price = paymentType === 'question' ? '₹10' : '₹15';
+
   const [initiatePayment, { isLoading, isError, error }] = useInitiatePaymentMutation();
   const [orderId, setOrderId] = useState(null);
   const paymentInitializedRef = useRef(false);
@@ -30,7 +33,7 @@ const Payment = () => {
     
     try {
       // Include the payment type in the payload
-      const paymentDetails = { paperId, currency: "INR", type: paymentType };
+      const paymentDetails = { paperId, currency: "INR", type: paymentType, amount: paymentType === 'question' ? 10 : 15 };
       const response = await initiatePayment(paymentDetails).unwrap();
       if (!response?.payment_session_id || !response?.order_id) {
         throw new Error("Invalid payment session or order ID");
@@ -95,8 +98,7 @@ const Payment = () => {
     }
   }, [paymentStatus, navigate, paymentType]);
 
-  // Calculate the price based on the payment type
-  const price = paymentType === 'question' ? '₹2' : '₹5';
+ 
 
   return (
     <div className="payment">
