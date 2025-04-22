@@ -21,8 +21,13 @@ import {
   };
   
   export const updatePayment = async (req, res) => {
+
+    const { orderId, type } = req.query;
+
+    console.log("Query Parameters:", req.query); // Log the query parameters for debugging
+
     try {
-      const result = await updatePaymentService(req.params.orderId);
+      const result = await updatePaymentService({ orderId, type });
       res.json(result);
     } catch (error) {
       res.status(500).json({
