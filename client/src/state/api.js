@@ -40,13 +40,13 @@ export const paperApi = createApi({
     }),
     updatePaymentStatus: builder.mutation({
       query: (statusDetails) => ({
-        url: 'api/payments/update-payment',
+        url: 'api/payments/update-payment', 
         method: 'POST',
         body: statusDetails,
       }),
     }),
     verifyPayment: builder.query({
-      query: ({ orderId, type }) => `api/payments/verify?orderId=${orderId}&type=${type || 'question'}`,
+      query: ({ orderId, type }) => `api/payments/update-payment?orderId=${orderId}&type=${type || 'question'}`,
     }),
     fetchEduData: builder.query({
       query: () => '/api/education/data',
