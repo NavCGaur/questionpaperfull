@@ -11,6 +11,6 @@ const router = express.Router();
 router.post('/create-order', createOrder);
 router.get('/update-payment/:orderId', updatePayment);
 router.get('/verify', verifyPayment);
-router.post('/cashfree', handleWebhook);
+router.post('/cashfree-webhook', handleWebhook);
 
 export default router;

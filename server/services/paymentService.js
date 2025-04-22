@@ -270,7 +270,7 @@ export const createOrderService = async (body) => {
           },
           order_meta: {
             return_url: `${process.env.FRONTEND_URL}/payment-verification?order_id=${orderId}&type=${type}`,
-            notify_url: `${process.env.BACKEND_URL}/api/payment/webhook`
+            notify_url: `${process.env.BACKEND_URL}/api/payments/cashfree-webhook`
           }
         };
     

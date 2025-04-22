@@ -54,7 +54,9 @@ import {
   
   export const handleWebhook = async (req, res) => {
     try {
+      console.log("Webhook Request Body:", req.body); // Log the request body for debugging
       const result = await handleWebhookService(req.body); // Pass req.body to the service
+
       res.status(200).json(result); // Send the result back to the client
     } catch (error) {
       console.error("Webhook Error:", error);
