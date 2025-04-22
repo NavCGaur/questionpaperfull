@@ -40,7 +40,7 @@ import chatbotRoutes from './routes/chatbotRoutes.js';
 
 
 // Routes
-app.use('/webhook', paymentRoutes);
+app.use('api/webhook', paymentRoutes);
 app.use('/api/papers', paperRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/questions', questionRoutes); 
