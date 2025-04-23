@@ -17,11 +17,24 @@ import ChatbotUI from "./container/chatbot/ChatbotUI";
 //import PaperInterfaceBilingual from './container/paperInterfaceBilingual';
 //import { QuestionMarkTwoTone } from '@mui/icons-material';
 import QuestionSummaryDashboard from './container/questionPaper/QuestionSummary';
+import { useFetchEduDataQuery } from './state/api'; // Update the import path
+import { useDispatch } from 'react-redux';
+import { setEduData } from './state/eduSlice'; // You'll need to create this slice
 
 function App() {
+  const dispatch = useDispatch();
+  const { data: eduData, isLoading, isError } = useFetchEduDataQuery();
+
   useEffect(() => {
     trackPageView();
   }, []);
+
+  useEffect(() => {
+    if (eduData) {
+      dispatch(setEduData(eduData));
+    }
+  }, [eduData, dispatch]);
+
 
   return (
     <Router>

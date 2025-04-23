@@ -3,6 +3,7 @@ import paperReducer from '../state/index';
 import { paperApi } from '../state/api';
 import chatbotReducer from "../state/chatbotSlice"; 
 import { chatbotApi } from "../state/chatbotApi";  // Import chatbot API
+import eduReducer from '../state/eduSlice'; // Import your eduSlice
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,8 @@ const store = configureStore({
     [paperApi.reducerPath]: paperApi.reducer,
     chatbot: chatbotReducer,
     [chatbotApi.reducerPath]: chatbotApi.reducer, // Add chatbot API reducer
+    eduData: eduReducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

@@ -2,18 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TextField, Button, LinearProgress, MenuItem, Select, InputLabel, FormControl, IconButton } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {storage} from '../../config/FirebaseConfig.js'
-import {  useFetchEduDataQuery} from '../../../state/api.js';
+import { useSelector } from 'react-redux';
 import './index.css';
 
-// Firebase imports
-import { ref, getDownloadURL } from 'firebase/storage';
 
 const PaperForm = ({ onClose, generatePaperMutation }) => {
 
     const [generatePaper, { isLoading }] = generatePaperMutation;
 
-    const { data: eduData } = useFetchEduDataQuery();
+    const eduData = useSelector((state) => state.eduData.data);
     
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
